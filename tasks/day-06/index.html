@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Type Ahead 👀</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<form class="search-form">
+    <input type="text" class="search" placeholder="City or State">
+    <ul class="suggestions">
+        <li>Filter for a city</li>
+        <li>or a state</li>
+    </ul>
+</form>
+<script>
+    // async function getData() {
+    //     const requestURL =
+    //         'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+    //     const request = new Request(requestURL);
+    //
+    //     const response = await fetch(request);
+    //     return await response.json();
+    // }
+    //
+    // const originalSuggestions = document.querySelector('.suggestions').innerHTML;
+    //
+    // (async () => {
+    //     const res = await getData();
+    //     const arrOfCities = Array.from(res);
+    //
+    //     const searchBox = document.querySelector('.search');
+    //     if (!searchBox) {
+    //         throw new Error("No results found");
+    //     }
+    //
+    //     searchBox.addEventListener('input', (e) => {
+    //         //czyszczenie listy ul
+    //         document.querySelector('.suggestions').innerHTML = null;
+    //
+    //         //ustawienie oryginalnego HTML dla listy gdy jest pusta
+    //         const value = e.target.value.toLowerCase();
+    //         if (value === '') {
+    //             document.querySelector('.suggestions').innerHTML = originalSuggestions;
+    //         }
+    //
+    //         const matches = [];
+    //         arrOfCities.forEach((obj) => {
+    //             const city = obj?.city.toLowerCase();
+    //             const state = obj?.state.toLowerCase();
+    //
+    //             if (value !== "" && (city.includes(value) || state.includes(value))) {
+    //                 matches.push(obj);
+    //             }
+    //         })
+    //
+    //         const newSuggestions = document.querySelector('.suggestions');
+    //         const regexp = new RegExp(`[a-z\\s]*${value}[a-z]*[\\s.]`, 'gi');
+    //
+    //         matches.forEach((match) => {
+    //             const li = document.createElement("li");
+    //             li.setAttribute('class', `suggestion`);
+    //             const str = `${match.city}\, ${match.state}`;
+    //             let matchingWord;
+    //
+    //             while ((matchingWord = regexp.exec(str)) !== null) {
+    //                 console.log(`Value wpisane: ${value}`)
+    //                 console.log(`${matchingWord} in ${match.city}\, ${match.state}`);
+    //                 console.log(
+    //                     `Found ${matchingWord[0]} start=${matchingWord.index} end=${regexp.lastIndex}.`,
+    //                 );
+    //
+    //                 if (matchingWord.index !== 0) {
+    //                     li.appendChild(document.createTextNode(str.slice(0, matchingWord.index)));
+    //                 }
+    //
+    //                 let matchWrapper = document.createElement("span");
+    //                 const matchStart = matchingWord.index;
+    //                 const matchEnd = regexp.lastIndex;
+    //                 matchWrapper.appendChild(document.createTextNode(str.slice(matchStart, matchEnd)));
+    //                 matchWrapper.setAttribute('class', 'hl');
+    //                 li.appendChild(matchWrapper);
+    //
+    //                 li.appendChild(document.createTextNode(str.slice(regexp.lastIndex)));
+    //                 //
+    //                 // let populationWrapper = document.createElement("span");
+    //                 // populationWrapper.appendChild(document.createTextNode(`${match?.population}`));
+    //                 // populationWrapper.setAttribute('class', 'population');
+    //                 //
+    //                 // li.appendChild(populationWrapper);
+    //                 li.setAttribute('class', 'suggestion');
+    //
+    //                 newSuggestions.appendChild(li);
+    //             }
+    //         })
+    //     });
+    // })()
+
+    //NIE MOJE ROZWIĄZANIE
+    const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+    const cities = [];
+
+    fetch(endpoint)
+        .then(res => res.json())
+        .then(data => cities.push(...data))
+
+    function findMatches(wordToMatch, cities) {
+        const regex = new RegExp(wordToMatch, 'gi');
+
+        return cities.filter(place => {
+            return place.city.match(regex) || place.state.match(regex);
+        })
+    }
+
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    function displayMatches() {
+        const matchArray = findMatches(this.value, cities);
+        const regex = new RegExp(this.value, 'gi');
+
+        const html = matchArray.map(place => {
+            const regex = new RegExp(this.value, 'gi');
+            const cityName = place.city.replace(regex, `<span class="hl">${this.value}</span>`);
+            const stateName = place.state.replace(regex, `<span class="hl">${this.value}</span>`);
+            return `
+      <li>
+        <span class="name">${cityName}, ${stateName}</span>
+        <span class="population">${numberWithCommas(place.population)}</span>
+      </li>
+    `;
+        }).join('');
+
+        suggestions.innerHTML = html;
+    }
+
+    const search = document.querySelector('.search');
+    const suggestions = document.querySelector('.suggestions');
+
+    search.addEventListener('change', displayMatches);
+
+</script>
+</body>
+</html>
